@@ -1,0 +1,11 @@
+{
+  "name": "incident-replay-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Production Incident Replay and Debugging Platform",
+  "scripts": {
+    "test": "npm --prefix backend test",
+    "build": "npm --prefix backend run build",
+    "dev:backend": "npm --prefix backend run dev"
+  }
+}
