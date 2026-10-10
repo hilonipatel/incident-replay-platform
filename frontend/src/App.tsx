@@ -12,7 +12,7 @@ import {
   type CreateIncidentEventInput,
   type ReplayRun,
 } from "./services/api";
-import ResponseDiffViewer from "./components/ResponseDiffViewer";
+import RequestTimeline from "./components/RequestTimeline";
 import "./App.css";
 
 type StatusFilter = "all" | "open" | "resolved";
@@ -757,7 +757,7 @@ const firstFailureDiagnosis = firstFailedReplayEvent
                     </div>
                   </div>
 
-                  {/* Results table */}
+                  {/* First-failure table */}
                   {firstFailedReplayEvent && firstFailureDiagnosis && (
                     <div className="first-failure-banner" role="status">
                       <div className="first-failure-heading">
@@ -814,11 +814,13 @@ const firstFailureDiagnosis = firstFailedReplayEvent
                     </div>
                   )}
                           
+                  {/* Request execution timeline */}
                   <div className="replay-results-heading">
                     <div>
-                      <h4>Request breakdown</h4>
+                      <h4>Request Execution Timeline</h4>
                       <p>
-                        Expected and actual responses for each recorded event.
+                        Follow each request in sequence and expand events to
+                        inspect response differences and execution errors.
                       </p>
                     </div>
 
@@ -838,133 +840,7 @@ const firstFailureDiagnosis = firstFailedReplayEvent
                       </p>
                     </div>
                   ) : (
-                    <div className="table-scroll replay-table-scroll">
-                      <table className="incident-table replay-results-table">
-                        <thead>
-                          <tr>
-                            <th scope="col">STEP</th>
-                            <th scope="col">REQUEST</th>
-                            <th scope="col">EXPECTED</th>
-                            <th scope="col">ACTUAL</th>
-                            <th scope="col">RESPONSE DIAGNOSTIC</th>
-                            <th scope="col">DURATION</th>
-                            <th scope="col">RESULT</th>
-                          </tr>
-                        </thead>
-
-                        <tbody>
-                          {replayRun.results.map((result) => {
-                            const passed = result.result === "PASS";
-
-                            const statusMatches =
-                              result.actualStatus === result.expectedStatus;
-
-                            const bodyMatches =
-                              JSON.stringify(result.expectedResponseBody ?? null) ===
-                              JSON.stringify(result.actualResponseBody ?? null);
-
-                            const failureReason =
-                              result.errorMessage ||
-                              (!statusMatches
-                                ? `Expected HTTP ${result.expectedStatus}, received ${
-                                    result.actualStatus ?? "no response"
-                                  }.`
-                                : !bodyMatches
-                                  ? "The actual response body differs from the expected body."
-                                  : "The request did not pass replay validation.");
-
-                            return (
-                              <tr
-                                key={`${replayRun.replayId}-${result.eventId}`}
-                                className={
-                                  passed
-                                    ? "replay-row replay-row--passed"
-                                    : "replay-row replay-row--failed"
-                                }
-                              >
-                                <td>
-                                  <span className="replay-step-number">
-                                    {String(result.sequenceNumber).padStart(2, "0")}
-                                  </span>
-                                </td>
-
-                                <td className="replay-request-cell">
-                                  <span
-                                    className={`replay-method replay-method--${result.method.toLowerCase()}`}
-                                  >
-                                    {result.method}
-                                  </span>
-                                  <code className="replay-request-path">
-                                    {result.path}
-                                  </code>
-                                </td>
-
-                                <td>
-                                  <span className="replay-http-code">
-                                    {result.expectedStatus}
-                                  </span>
-                                </td>
-
-                                <td>
-                                  <span
-                                    className={`replay-http-code ${
-                                      statusMatches
-                                        ? "replay-http-code--match"
-                                        : "replay-http-code--mismatch"
-                                    }`}
-                                  >
-                                    {result.actualStatus ?? "No response"}
-                                  </span>
-                                  {!statusMatches && (
-                                    <span className="replay-difference-label">
-                                      Status mismatch
-                                    </span>
-                                  )}
-                                </td>
-
-                                <td className="replay-diagnostics-cell">
-                                  <ResponseDiffViewer
-                                    expected={result.expectedResponseBody}
-                                    actual={result.actualResponseBody}
-                                    expectedStatus={result.expectedStatus}
-                                    actualStatus={result.actualStatus}
-                                    result={result.result}
-                                    errorMessage={result.errorMessage}
-                                  />
-                                </td>
-
-                                <td>
-                                  <span className="replay-duration">
-                                    {result.durationMs} ms
-                                  </span>
-                                </td>
-
-                                <td className="replay-result-cell">
-                                  <span
-                                    className={`replay-result-badge ${
-                                      passed
-                                        ? "replay-result-badge--passed"
-                                        : "replay-result-badge--failed"
-                                    }`}
-                                  >
-                                    <span aria-hidden="true">
-                                      {passed ? "✓" : "!"}
-                                    </span>
-                                    {result.result}
-                                  </span>
-
-                                  {!passed && (
-                                    <p className="replay-failure-reason">
-                                      {failureReason}
-                                    </p>
-                                  )}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
+                    <RequestTimeline results={replayRun.results} />
                   )}
 
                   {/* Report footer */}
