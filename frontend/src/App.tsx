@@ -630,143 +630,296 @@ function App() {
               )}
 
               {replayRun && (
-                <div className="replay-results">
-                  <div className="details-section-heading">
+                <section className="replay-report" aria-label="Replay report">
+                  {/* Report header */}
+                  <div className="replay-report-header">
                     <div>
                       <div className="section-index">02 / REPORT</div>
-                      <h3>Replay Results</h3>
+                      <h3 className="replay-report-title">Replay Results</h3>
+                      <p className="replay-report-subtitle">
+                        Review response differences and identify failed requests.
+                      </p>
                     </div>
 
                     <span
-                      className={`status-badge ${
-                        replayRun.status === "completed"
-                          ? "status-resolved"
-                          : replayRun.status === "failed"
-                            ? "status-open"
-                            : ""
-                      }`}
+                      className={`replay-run-status replay-run-status--${replayRun.status}`}
                     >
+                      <span className="replay-run-status-dot" />
                       {replayRun.status}
                     </span>
                   </div>
 
-                  <div className="details-grid replay-stats-grid">
-                    <div className="details-card">
-                      <span className="details-card-label">TOTAL</span>
-                      <strong>{replayRun.total}</strong>
+                  {/* Summary cards */}
+                  <div className="replay-summary-grid">
+                    <div className="replay-summary-card">
+                      <span className="replay-summary-label">TOTAL REQUESTS</span>
+                      <strong className="replay-summary-value">
+                        {replayRun.total}
+                      </strong>
+                      <span className="replay-summary-caption">
+                        Requests executed
+                      </span>
                     </div>
 
-                    <div className="details-card">
-                      <span className="details-card-label">PASSED</span>
-                      <strong className="replay-passed">
+                    <div className="replay-summary-card replay-summary-card--passed">
+                      <span className="replay-summary-label">PASSED</span>
+                      <strong className="replay-summary-value">
                         {replayRun.passed}
                       </strong>
+                      <span className="replay-summary-caption">
+                        Responses matched
+                      </span>
                     </div>
 
-                    <div className="details-card">
-                      <span className="details-card-label">FAILED</span>
-                      <strong className="replay-failed">
+                    <div className="replay-summary-card replay-summary-card--failed">
+                      <span className="replay-summary-label">FAILED</span>
+                      <strong className="replay-summary-value">
                         {replayRun.failed}
                       </strong>
+                      <span className="replay-summary-caption">
+                        Require investigation
+                      </span>
+                    </div>
+
+                    <div className="replay-summary-card">
+                      <span className="replay-summary-label">PASS RATE</span>
+                      <strong className="replay-summary-value">
+                        {replayRun.total > 0
+                          ? `${Math.round(
+                              (replayRun.passed / replayRun.total) * 100
+                            )}%`
+                          : "—"}
+                      </strong>
+                      <div
+                        className="replay-pass-track"
+                        role="progressbar"
+                        aria-label="Replay pass rate"
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={
+                          replayRun.total > 0
+                            ? Math.round(
+                                (replayRun.passed / replayRun.total) * 100
+                              )
+                            : 0
+                        }
+                      >
+                        <span
+                          className="replay-pass-track-fill"
+                          style={{
+                            width:
+                              replayRun.total > 0
+                                ? `${Math.max(
+                                    0,
+                                    Math.min(
+                                      100,
+                                      (replayRun.passed / replayRun.total) * 100
+                                    )
+                                  )}%`
+                                : "0%",
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  <div className="table-scroll">
-                  <table className="incident-table">
-                      <thead>
-                        <tr>
-                          <th scope="col">SEQUENCE</th>
-                          <th scope="col">REQUEST</th>
-                          <th scope="col">EXPECTED</th>
-                          <th scope="col">ACTUAL</th>
-                          <th scope="col">EXPECTED BODY</th>
-                          <th scope="col">ACTUAL BODY</th>
-                          <th scope="col">DURATION</th>
-                          <th scope="col">RESULT</th>
-                        </tr>
-                      </thead>
+                  {/* Results table */}
+                  <div className="replay-results-heading">
+                    <div>
+                      <h4>Request breakdown</h4>
+                      <p>
+                        Expected and actual responses for each recorded event.
+                      </p>
+                    </div>
 
-                      <tbody>
-                        {(replayRun.results ?? []).map((result) => (
-                          <tr key={`${replayRun.replayId}-${result.eventId}`}>
-                            <td>
-                              {String(result.sequenceNumber).padStart(2, "0")}
-                            </td>
+                    <span className="replay-result-count">
+                      {(replayRun.results ?? []).length} events
+                    </span>
+                  </div>
 
-                            <td>
-                              <strong>{result.method}</strong>
-                              <div>{result.path}</div>
-                            </td>
+                  {!replayRun.results || replayRun.results.length === 0 ? (
+                    <div className="replay-empty-state">
+                      <span className="replay-empty-icon" aria-hidden="true">
+                        ∅
+                      </span>
+                      <h4>No replay results</h4>
+                      <p>
+                        No request results are available for this replay.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="table-scroll replay-table-scroll">
+                      <table className="incident-table replay-results-table">
+                        <thead>
+                          <tr>
+                            <th scope="col">STEP</th>
+                            <th scope="col">REQUEST</th>
+                            <th scope="col">EXPECTED</th>
+                            <th scope="col">ACTUAL</th>
+                            <th scope="col">EXPECTED BODY</th>
+                            <th scope="col">ACTUAL BODY</th>
+                            <th scope="col">DURATION</th>
+                            <th scope="col">RESULT</th>
+                          </tr>
+                        </thead>
 
-                            <td>{result.expectedStatus}</td>
+                        <tbody>
+                          {replayRun.results.map((result, index) => {
+                            const passed = result.result === "PASS";
 
-                            <td>
-                              <span
+                            const statusMatches =
+                              result.actualStatus === result.expectedStatus;
+
+                            const bodyMatches =
+                              JSON.stringify(result.expectedResponseBody ?? null) ===
+                              JSON.stringify(result.actualResponseBody ?? null);
+
+                            const failureReason =
+                              result.errorMessage ||
+                              (!statusMatches
+                                ? `Expected HTTP ${result.expectedStatus}, received ${
+                                    result.actualStatus ?? "no response"
+                                  }.`
+                                : !bodyMatches
+                                  ? "The actual response body differs from the expected body."
+                                  : "The request did not pass replay validation.");
+
+                            return (
+                              <tr
+                                key={`${replayRun.replayId}-${result.eventId}`}
                                 className={
-                                  result.actualStatus === result.expectedStatus
-                                    ? "replay-status-match"
-                                    : "replay-status-mismatch"
+                                  passed
+                                    ? "replay-row replay-row--passed"
+                                    : "replay-row replay-row--failed"
                                 }
                               >
-                                {result.actualStatus ?? "No response"}
-                              </span>
-                            </td>
+                                <td>
+                                  <span className="replay-step-number">
+                                    {String(result.sequenceNumber).padStart(2, "0")}
+                                  </span>
+                                </td>
 
-                            <td>
-                              <pre className="replay-body">
-                                {result.expectedResponseBody == null
-                                  ? "—"
-                                  : JSON.stringify(
-                                      result.expectedResponseBody,
-                                      null,
-                                      2
-                                    )}
-                              </pre>
-                            </td>
+                                <td className="replay-request-cell">
+                                  <span
+                                    className={`replay-method replay-method--${result.method.toLowerCase()}`}
+                                  >
+                                    {result.method}
+                                  </span>
+                                  <code className="replay-request-path">
+                                    {result.path}
+                                  </code>
+                                </td>
 
-                            <td>
-                              <pre className="replay-body">
-                                {result.actualResponseBody == null
-                                  ? "—"
-                                  : JSON.stringify(
-                                      result.actualResponseBody,
-                                      null,
-                                      2
-                                    )}
-                              </pre>
-                            </td>
+                                <td>
+                                  <span className="replay-http-code">
+                                    {result.expectedStatus}
+                                  </span>
+                                </td>
 
-                            <td>{result.durationMs} ms</td>
+                                <td>
+                                  <span
+                                    className={`replay-http-code ${
+                                      statusMatches
+                                        ? "replay-http-code--match"
+                                        : "replay-http-code--mismatch"
+                                    }`}
+                                  >
+                                    {result.actualStatus ?? "No response"}
+                                  </span>
+                                  {!statusMatches && (
+                                    <span className="replay-difference-label">
+                                      Status mismatch
+                                    </span>
+                                  )}
+                                </td>
 
-                            <td>
-                              <span
-                                className={`status-badge ${
-                                  result.result === "PASS"
-                                    ? "status-resolved"
-                                    : "status-open"
-                                }`}
-                              >
-                                {result.result}
-                              </span>
+                                <td>
+                                  <pre className="replay-json">
+                                    {result.expectedResponseBody == null
+                                      ? "—"
+                                      : JSON.stringify(
+                                          result.expectedResponseBody,
+                                          null,
+                                          2
+                                        )}
+                                  </pre>
+                                </td>
 
-                              {(result.errorMessage ||
-                                result.actualStatus !== result.expectedStatus ||
-                                result.result === "FAIL") && (
-                                <p className="field-hint replay-error-detail">
-                                  {result.errorMessage ||
-                                    (result.actualStatus !== result.expectedStatus
-                                      ? `Expected HTTP ${result.expectedStatus}, received ${
-                                          result.actualStatus ?? "no response"
-                                        }.`
-                                      : "The actual response did not match the expected response.")}
-                                </p>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table></div>
-                </div>
+                                <td>
+                                  <pre
+                                    className={`replay-json ${
+                                      !bodyMatches
+                                        ? "replay-json--mismatch"
+                                        : ""
+                                    }`}
+                                  >
+                                    {result.actualResponseBody == null
+                                      ? "—"
+                                      : JSON.stringify(
+                                          result.actualResponseBody,
+                                          null,
+                                          2
+                                        )}
+                                  </pre>
+
+                                  {!bodyMatches && (
+                                    <span className="replay-difference-label">
+                                      Body mismatch
+                                    </span>
+                                  )}
+                                </td>
+
+                                <td>
+                                  <span className="replay-duration">
+                                    {result.durationMs} ms
+                                  </span>
+                                </td>
+
+                                <td className="replay-result-cell">
+                                  <span
+                                    className={`replay-result-badge ${
+                                      passed
+                                        ? "replay-result-badge--passed"
+                                        : "replay-result-badge--failed"
+                                    }`}
+                                  >
+                                    <span aria-hidden="true">
+                                      {passed ? "✓" : "!"}
+                                    </span>
+                                    {result.result}
+                                  </span>
+
+                                  {!passed && (
+                                    <p className="replay-failure-reason">
+                                      {failureReason}
+                                    </p>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {/* Report footer */}
+                  {replayRun.results && replayRun.results.length > 0 && (
+                    <div className="replay-report-footer">
+                      <span>
+                        <span className="replay-footer-dot" />
+                        Replay ID: {replayRun.replayId}
+                      </span>
+                      <span>
+                        {replayRun.failed === 0
+                          ? "All requests passed validation."
+                          : `${replayRun.failed} request${
+                              replayRun.failed === 1 ? "" : "s"
+                            } need investigation.`}
+                      </span>
+                    </div>
+                  )}
+                </section>
               )}
             </section>
 
