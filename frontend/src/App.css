@@ -2803,3 +2803,12 @@ h1 {
     gap: 6px;
   }
 }
+
+/* Separate the execution, history, and request sequence boxes */ 
+.details-replay-panel { 
+  margin-bottom: 24px; 
+}
+
+.details-events-section { 
+  margin-top: 24px; 
+}

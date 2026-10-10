@@ -200,3 +200,54 @@ export async function getReplayResults(
 
   return replay;
 }
+
+export async function listReplayHistory(incidentId: number) {
+  if (!Number.isSafeInteger(incidentId) || incidentId < 1) {
+    throw Object.assign(new Error("Invalid incident ID"), {
+      statusCode: 400,
+    });
+  }
+
+  const incident =
+    await incidentRepository.findIncidentById(incidentId);
+
+  if (!incident) {
+    throw Object.assign(new Error("Incident not found"), {
+      statusCode: 404,
+    });
+  }
+
+  const result = await pool.query(
+    `SELECT
+       rr.id::text AS id,
+       rr.incident_id::text AS incident_id,
+       rr.started_at,
+       rr.completed_at,
+       rr.status,
+       COUNT(res.id)::int AS total_requests,
+       COUNT(res.id) FILTER (
+         WHERE res.result = 'PASS'
+       )::int AS passed,
+       COUNT(res.id) FILTER (
+         WHERE res.result = 'FAIL'
+       )::int AS failed,
+       COALESCE(
+         ROUND(
+           100.0 * COUNT(res.id) FILTER (
+             WHERE res.result = 'PASS'
+           ) / NULLIF(COUNT(res.id), 0),
+           1
+         ),
+         0
+       ) AS pass_rate
+     FROM replay_runs rr
+     LEFT JOIN replay_results res
+       ON res.replay_run_id = rr.id
+     WHERE rr.incident_id = $1
+     GROUP BY rr.id
+     ORDER BY rr.started_at DESC, rr.id DESC`,
+    [incidentId]
+  );
+
+  return result.rows;
+}

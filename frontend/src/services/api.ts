@@ -345,3 +345,46 @@ export async function getReplayResults(
     })),
   };
 }
+
+export async function getReplayHistory(
+  incidentId: string | number
+): Promise<ReplayRun[]> {
+  const response = await fetch(
+    `${API_BASE_URL}/incidents/${encodeURIComponent(
+      String(incidentId)
+    )}/replays`
+  );
+
+  const result = await readResponse(response);
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(
+        result,
+        `Failed to load replay history (${response.status})`
+      )
+    );
+  }
+
+  const replays = unwrapData<unknown>(result, "replay history");
+
+  if (!Array.isArray(replays)) {
+    throw new Error(
+      "Unexpected response from the replay history API."
+    );
+  }
+
+  return Promise.all(
+    replays.map(async (item) => {
+      if (
+        typeof item !== "object" ||
+        item === null ||
+        !("id" in item)
+      ) {
+        throw new Error("Invalid replay history entry.");
+      }
+
+      return getReplayResults(incidentId, String(item.id));
+    })
+  );
+}

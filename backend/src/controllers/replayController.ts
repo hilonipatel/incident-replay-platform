@@ -42,3 +42,20 @@ export async function getReplayResults(
     next(error);
   }
 }
+
+export async function listReplayHistory(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const incidentId = Number(req.params.id);
+
+    const history =
+      await service.listReplayHistory(incidentId);
+
+    res.json({ data: history });
+  } catch (error) {
+    next(error);
+  }
+}

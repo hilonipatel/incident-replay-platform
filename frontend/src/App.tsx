@@ -13,6 +13,7 @@ import {
   type ReplayRun,
 } from "./services/api";
 import RequestTimeline from "./components/RequestTimeline";
+import ReplayHistory from "./components/ReplayHistory";
 import "./App.css";
 
 type StatusFilter = "all" | "open" | "resolved";
@@ -862,6 +863,12 @@ const firstFailureDiagnosis = firstFailedReplayEvent
                 </section>
               )}
             </section>
+            
+            {/* Replay history */}
+            <ReplayHistory
+              incidentId={selectedIncident.id}
+              currentReplay={replayRun ?? null}
+            />
 
             <section className="incident-section details-events-section">
               <div className="details-section-heading">

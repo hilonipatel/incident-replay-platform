@@ -1,0 +1,534 @@
+.replay-history {
+    display: grid;
+    gap: 18px;
+    min-width: 0;
+    color: var(--text-primary, #e5e7eb);
+    font-size: 13px;
+}
+  
+.replay-history-heading,
+.history-run,
+.history-run-title,
+.history-run-meta,
+.history-run-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+  
+.replay-history-heading {
+    justify-content: space-between;
+}
+  
+.replay-history-heading h2,
+.history-comparison h3 {
+    margin: 0;
+    font-size: 17px;
+}
+  
+.replay-history-heading p {
+    margin: 5px 0 0;
+    color: var(--text-secondary, #a1aab8);
+}
+  
+.history-count {
+    color: var(--text-secondary, #a1aab8);
+}
+  
+.history-list {
+    display: grid;
+    gap: 10px;
+}
+  
+.history-run {
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 14px;
+    border: 1px solid var(--border, #303744);
+    border-radius: 8px;
+    background: var(--surface, #151a22);
+}
+  
+.history-run-current {
+    border-color: var(--accent, #60a5fa);
+}
+  
+.history-run-main {
+    flex: 1;
+    min-width: 180px;
+}
+  
+.history-run-title {
+    margin-bottom: 8px;
+}
+  
+.history-current-tag {
+    padding: 3px 7px;
+    border-radius: 4px;
+    background: rgba(96, 165, 250, 0.12);
+    color: #93c5fd;
+    font-size: 11px;
+}
+  
+.history-run-meta {
+    color: var(--text-secondary, #a1aab8);
+    font-size: 12px;
+}
+  
+.history-progress {
+    width: 100%;
+    max-width: 300px;
+    height: 5px;
+    margin: 10px 0 5px;
+    overflow: hidden;
+    border-radius: 10px;
+    background: var(--border, #303744);
+}
+  
+.history-progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: #34d399;
+    transition: width 180ms ease;
+}
+  
+.history-pass-rate {
+    color: var(--text-secondary, #a1aab8);
+    font-size: 11px;
+}
+  
+.history-run-actions {
+    justify-content: flex-end;
+}
+  
+.history-run-actions button {
+    padding: 7px 10px;
+    border: 1px solid var(--border, #394150);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-primary, #e5e7eb);
+    font: inherit;
+    cursor: pointer;
+}
+  
+.history-run-actions button:hover {
+    background: var(--surface-hover, #252d39);
+}
+  
+.history-status,
+.history-change {
+    display: inline-block;
+    padding: 4px 7px;
+    border: 1px solid currentColor;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+  
+.history-status-pass,
+.history-change-improved {
+    color: #34d399;
+}
+  
+.history-status-fail,
+.history-change-regressed {
+    color: #fb7185;
+}
+  
+.history-change-unchanged {
+    color: #94a3b8;
+}
+  
+.history-change-changed,
+.history-change-new {
+    color: #fbbf24;
+}
+  
+.history-comparison {
+    display: grid;
+    gap: 14px;
+    padding: 16px;
+    border: 1px solid var(--border, #303744);
+    border-radius: 8px;
+    background: var(--surface, #151a22);
+}
+  
+.history-comparison-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+  
+.history-comparison-summary > div {
+    display: grid;
+    gap: 7px;
+    padding: 12px;
+    border: 1px solid var(--border, #303744);
+    border-radius: 6px;
+}
+  
+.history-comparison-summary span {
+    color: var(--text-secondary, #a1aab8);
+    font-size: 11px;
+}
+  
+.history-comparison-summary strong {
+    font-size: 20px;
+}
+  
+.history-comparison-table-wrapper {
+    overflow-x: auto;
+}
+  
+.history-comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+  
+.history-comparison-table th,
+.history-comparison-table td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border, #303744);
+    vertical-align: top;
+}
+  
+.history-comparison-table th {
+    color: var(--text-secondary, #a1aab8);
+    font-size: 10px;
+    text-transform: uppercase;
+}
+  
+.history-comparison-table code {
+    overflow-wrap: anywhere;
+}
+  
+.history-empty,
+.history-error {
+    margin: 0;
+    padding: 14px;
+    border-radius: 6px;
+    line-height: 1.6;
+}
+  
+.history-empty {
+    color: var(--text-secondary, #a1aab8);
+    background: var(--surface, #151a22);
+}
+  
+.history-error {
+    color: #fca5a5;
+    background: rgba(244, 63, 94, 0.08);
+    overflow-wrap: anywhere;
+}
+  
+@media (max-width: 600px) {
+    .history-run {
+      align-items: flex-start;
+    }
+  
+    .history-run-actions {
+      justify-content: flex-start;
+      width: 100%;
+    }
+  
+    .history-comparison-summary {
+      grid-template-columns: 1fr;
+    }
+}
+  
+@media (prefers-reduced-motion: reduce) {
+    .history-progress-fill {
+      transition: none;
+    }
+}
+
+.history-collapse-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+}
+  
+.history-collapse-toggle > span:first-child {
+    font-size: 18px;
+    color: var(--text-secondary, #a1aab8);
+}
+  
+.history-collapse-toggle h2 {
+    margin: 0;
+    font-size: 17px;
+}
+  
+.history-collapse-toggle p {
+    margin: 5px 0 0;
+    color: var(--text-secondary, #a1aab8);
+}
+  
+.history-collapse-toggle:focus-visible {
+    outline: 2px solid var(--accent, #60a5fa);
+    outline-offset: 5px;
+    border-radius: 4px;
+}
+  
+.history-expanded-content {
+    display: grid;
+    gap: 18px;
+    min-width: 0;
+}
+
+.history-run-wrapper {
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+}
+  
+.history-run-wrapper > .history-comparison {
+    margin-left: 20px;
+    animation: comparison-appear 180ms ease-out;
+}
+  
+@keyframes comparison-appear {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+}
+  
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+  
+@media (prefers-reduced-motion: reduce) {
+    .history-run-wrapper > .history-comparison {
+        animation: none;
+    }
+}
+
+.replay-history-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+}
+  
+.history-collapse-toggle {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text-primary, #e5e7eb);
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+}
+  
+  .history-section-number {
+    flex-shrink: 0;
+    color: var(--text-secondary, #a1aab8);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+  
+.history-heading-content {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+}
+  
+.history-section-title {
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+  
+.history-section-description {
+    color: var(--text-secondary, #a1aab8);
+    font-size: 13px;
+    line-height: 1.5;
+}
+  
+.history-collapse-icon {
+    margin-left: auto;
+    flex-shrink: 0;
+    color: var(--text-secondary, #a1aab8);
+    font-size: 18px;
+}
+  
+.history-collapse-toggle:hover .history-section-title {
+    color: var(--accent, #60a5fa);
+}
+  
+.history-collapse-toggle:focus-visible {
+    outline: 2px solid var(--accent, #60a5fa);
+    outline-offset: 5px;
+    border-radius: 4px;
+}
+  
+.history-count {
+    flex-shrink: 0;
+    color: var(--text-secondary, #a1aab8);
+    font-size: 12px;
+}
+  
+.history-expanded-content {
+    display: grid;
+    gap: 18px;
+    min-width: 0;
+}
+  
+@media (max-width: 600px) {
+    .replay-history-heading {
+      align-items: flex-start;
+    }
+  
+    .history-collapse-toggle {
+      gap: 8px;
+    }
+  
+    .history-section-title {
+      font-size: 15px;
+    }
+  
+    .history-section-description {
+      font-size: 12px;
+    }
+}
+
+/* Replay history section header */
+.replay-history {
+    margin-top: 24px;
+    padding: 24px;
+    border: 1px solid var(--border-color, #2b303b);
+    border-radius: 12px;
+    background: var(--panel-background, #11151d);
+}
+  
+.replay-history-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+  
+.history-collapse-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+  
+.history-section-number {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-muted, #8b93a5);
+}
+  
+.history-heading-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+  
+.history-section-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary, #f1f3f8);
+}
+  
+.history-section-description {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-muted, #8b93a5);
+}
+  
+.history-collapse-icon {
+    margin-left: auto;
+    font-size: 18px;
+    color: var(--text-muted, #8b93a5);
+}
+  
+.history-count {
+    flex-shrink: 0;
+    font-size: 12px;
+    color: var(--text-muted, #8b93a5);
+}
+
+/* Match the spacing and appearance of neighboring sections */ 
+.replay-history {
+    margin: 24px 0; 
+    padding: 24px; 
+    box-sizing: border-box; 
+    width: 100%; 
+    border: 1px solid var(--border-color, #2a2d35); 
+    border-radius: 12px; 
+}
+
+/* Align the heading with the other section headings */ 
+.replay-history-heading { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    gap: 16px; 
+    width: 100%; 
+}
+
+.history-collapse-toggle { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    flex: 1; 
+    min-width: 0; 
+    padding: 0; 
+    border: none; 
+    background: transparent; 
+    color: inherit; 
+    text-align: left; 
+    cursor: pointer; 
+}
+
+.history-heading-content { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 6px; 
+}
+
+.history-section-number { 
+    flex-shrink: 0; 
+}
+
+.history-collapse-icon, .history-count { 
+    flex-shrink: 0; 
+}
+
+/* Add separation between the heading and expanded content */ 
+.history-expanded-content { 
+    margin-top: 24px; 
+    padding-top: 20px; 
+    border-top: 1px solid var(--border-color, #2a2d35); 
+}
