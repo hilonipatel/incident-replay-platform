@@ -74,3 +74,9 @@ export function getOrder(req: Request, res: Response) {
       order,
     });
   }
+
+export function getOrders(_req: Request, res: Response) {
+  res.status(503).json({
+    error: "Order service unavailable",
+  });
+}
