@@ -12,6 +12,7 @@ import {
   type CreateIncidentEventInput,
   type ReplayRun,
 } from "./services/api";
+import ResponseDiffViewer from "./components/ResponseDiffViewer";
 import "./App.css";
 
 type StatusFilter = "all" | "open" | "resolved";
@@ -101,6 +102,39 @@ function App() {
   const [replaying, setReplaying] = useState(false);
   const [replayError, setReplayError] = useState("");
   const [replayRun, setReplayRun] = useState<ReplayRun | null>(null);
+
+  const firstFailedReplayEvent =
+  replayRun?.results
+    .slice()
+    .sort((a, b) => a.sequenceNumber - b.sequenceNumber)
+    .find((result) => result.result === "FAIL") ?? null;
+
+const firstFailureDiagnosis = firstFailedReplayEvent
+  ? firstFailedReplayEvent.errorMessage
+    ? {
+        title: "Request execution error",
+        description: firstFailedReplayEvent.errorMessage,
+      }
+    : firstFailedReplayEvent.actualStatus === null
+      ? {
+          title: "No HTTP response received",
+          description:
+            "The request failed before an HTTP response was received.",
+        }
+      : firstFailedReplayEvent.actualStatus !==
+        firstFailedReplayEvent.expectedStatus
+        ? {
+            title: "HTTP status mismatch",
+            description:
+              `Expected HTTP ${firstFailedReplayEvent.expectedStatus}, ` +
+              `but received ${firstFailedReplayEvent.actualStatus}.`,
+          }
+        : {
+            title: "Response body mismatch",
+            description:
+              "The HTTP status matched, but the actual response body differs from the expected body.",
+          }
+  : null;
 
   async function handleRunReplay() {
     if (!selectedIncident || replaying) return;
@@ -724,6 +758,62 @@ function App() {
                   </div>
 
                   {/* Results table */}
+                  {firstFailedReplayEvent && firstFailureDiagnosis && (
+                    <div className="first-failure-banner" role="status">
+                      <div className="first-failure-heading">
+                        <span className="first-failure-indicator" aria-hidden="true">
+                          !
+                        </span>
+
+                        <div>
+                          <strong>First failing event</strong>
+                          <div className="first-failure-type">
+                            {firstFailureDiagnosis.title}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="first-failure-request">
+                        <span className="first-failure-sequence">
+                          Sequence{" "}
+                          {String(
+                            firstFailedReplayEvent.sequenceNumber
+                          ).padStart(2, "0")}
+                        </span>
+
+                        <strong>
+                          {firstFailedReplayEvent.method}{" "}
+                          {firstFailedReplayEvent.path}
+                        </strong>
+                      </div>
+
+                      <div className="first-failure-statuses">
+                        <span>
+                          Expected HTTP{" "}
+                          <strong>{firstFailedReplayEvent.expectedStatus}</strong>
+                        </span>
+
+                        <span
+                          className={
+                            firstFailedReplayEvent.actualStatus ===
+                            firstFailedReplayEvent.expectedStatus
+                              ? "first-failure-status-match"
+                              : "first-failure-status-mismatch"
+                          }
+                        >
+                          Actual HTTP{" "}
+                          <strong>
+                            {firstFailedReplayEvent.actualStatus ?? "No response"}
+                          </strong>
+                        </span>
+                      </div>
+
+                      <p className="first-failure-description">
+                        {firstFailureDiagnosis.description}
+                      </p>
+                    </div>
+                  )}
+                          
                   <div className="replay-results-heading">
                     <div>
                       <h4>Request breakdown</h4>
@@ -756,15 +846,14 @@ function App() {
                             <th scope="col">REQUEST</th>
                             <th scope="col">EXPECTED</th>
                             <th scope="col">ACTUAL</th>
-                            <th scope="col">EXPECTED BODY</th>
-                            <th scope="col">ACTUAL BODY</th>
+                            <th scope="col">RESPONSE DIAGNOSTIC</th>
                             <th scope="col">DURATION</th>
                             <th scope="col">RESULT</th>
                           </tr>
                         </thead>
 
                         <tbody>
-                          {replayRun.results.map((result, index) => {
+                          {replayRun.results.map((result) => {
                             const passed = result.result === "PASS";
 
                             const statusMatches =
@@ -833,40 +922,15 @@ function App() {
                                   )}
                                 </td>
 
-                                <td>
-                                  <pre className="replay-json">
-                                    {result.expectedResponseBody == null
-                                      ? "—"
-                                      : JSON.stringify(
-                                          result.expectedResponseBody,
-                                          null,
-                                          2
-                                        )}
-                                  </pre>
-                                </td>
-
-                                <td>
-                                  <pre
-                                    className={`replay-json ${
-                                      !bodyMatches
-                                        ? "replay-json--mismatch"
-                                        : ""
-                                    }`}
-                                  >
-                                    {result.actualResponseBody == null
-                                      ? "—"
-                                      : JSON.stringify(
-                                          result.actualResponseBody,
-                                          null,
-                                          2
-                                        )}
-                                  </pre>
-
-                                  {!bodyMatches && (
-                                    <span className="replay-difference-label">
-                                      Body mismatch
-                                    </span>
-                                  )}
+                                <td className="replay-diagnostics-cell">
+                                  <ResponseDiffViewer
+                                    expected={result.expectedResponseBody}
+                                    actual={result.actualResponseBody}
+                                    expectedStatus={result.expectedStatus}
+                                    actualStatus={result.actualStatus}
+                                    result={result.result}
+                                    errorMessage={result.errorMessage}
+                                  />
                                 </td>
 
                                 <td>
